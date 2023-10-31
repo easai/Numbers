@@ -8,6 +8,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
+    setWindowIcon(QIcon("://images/favicon.ico"));
   connect(ui->comboBox, &QComboBox::currentIndexChanged, this,
           &MainWindow::setLang);
   connect(ui->pushButton_save, &QPushButton::clicked, this,
