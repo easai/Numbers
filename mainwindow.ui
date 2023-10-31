@@ -88,6 +88,7 @@
     <property name="title">
      <string>&amp;Help</string>
     </property>
+    <addaction name="action_About_Numbers"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Edit"/>
@@ -97,6 +98,11 @@
   <action name="action_Quit">
    <property name="text">
     <string>&amp;Quit</string>
+   </property>
+  </action>
+  <action name="action_About_Numbers">
+   <property name="text">
+    <string>&amp;About Numbers</string>
    </property>
   </action>
  </widget>

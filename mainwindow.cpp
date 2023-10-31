@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "config.h"
+#include "aboutdialog.h"
 #include "./ui_mainwindow.h"
 
 #include <QtAlgorithms>
@@ -13,6 +14,8 @@ MainWindow::MainWindow(QWidget *parent)
           &MainWindow::setLang);
   connect(ui->pushButton_save, &QPushButton::clicked, this,
           &MainWindow::saveItem);
+  connect(ui->action_About_Numbers, &QAction::triggered, this,
+          &MainWindow::about);
   connect(ui->action_Quit, &QAction::triggered, this, &QApplication::quit);
   m_db = QSqlDatabase::addDatabase("QODBC", "linguistics");
   m_db.setDatabaseName("linguistics");
@@ -83,4 +86,9 @@ void MainWindow::showTable(const int &lang_id) {
     QTableWidgetItem *descItem = new QTableWidgetItem(val);
     ui->tableWidget->setItem(i, 1, descItem);
   }
+}
+
+void MainWindow::about() {
+  AboutDialog *dlg = new AboutDialog(this);
+  dlg->exec();
 }
