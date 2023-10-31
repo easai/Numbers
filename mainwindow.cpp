@@ -1,7 +1,7 @@
 #include "mainwindow.h"
-#include "config.h"
-#include "aboutdialog.h"
 #include "./ui_mainwindow.h"
+#include "aboutdialog.h"
+#include "config.h"
 
 #include <QtAlgorithms>
 #include <algorithm>
@@ -9,7 +9,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
-    setWindowIcon(QIcon("://images/favicon.ico"));
+  setWindowIcon(QIcon("://images/favicon.ico"));
   connect(ui->comboBox, &QComboBox::currentIndexChanged, this,
           &MainWindow::setLang);
   connect(ui->pushButton_save, &QPushButton::clicked, this,
@@ -21,8 +21,11 @@ MainWindow::MainWindow(QWidget *parent)
   m_db.setDatabaseName("linguistics");
   initLang();
   m_config.load();
-  QString defaultLang=m_config.lang();
+
+  QString defaultLang = m_config.lang();
   ui->comboBox->setCurrentText(defaultLang);
+  connect(ui->tableWidget, &QTableWidget::cellChanged, this,
+          &MainWindow::updateItem);
 }
 
 MainWindow::~MainWindow() {
@@ -39,7 +42,6 @@ void MainWindow::initLang() {
   }
 }
 
-
 void MainWindow::setLang() {
   QString lang = ui->comboBox->currentText();
   int lang_id = m_langTable.get(lang);
@@ -47,20 +49,31 @@ void MainWindow::setLang() {
   showTable(lang_id);
 }
 
-void MainWindow::saveItem()
-{
-  QString num=ui->lineEdit_num->text();
-  QString exp=ui->lineEdit_exp->text();
+void MainWindow::saveItem() {
+  QString num = ui->lineEdit_num->text();
+  QString exp = ui->lineEdit_exp->text();
   QString lang = ui->comboBox->currentText();
-  int lang_id=m_langTable.get(lang);
-  m_numberTable.saveItem(&m_db, num.toInt(), exp, lang_id, lang);
+  int lang_id = m_langTable.get(lang);
+  m_numberTable.createItem(&m_db, num.toInt(), exp, lang_id, lang);
   showTable(lang_id);
 }
 
+void MainWindow::updateItem() {
+  QList<QTableWidgetItem *> lst = ui->tableWidget->selectedItems();
+  for (QTableWidgetItem *pItem : lst) {
+    QString exp = pItem->text();
+    int row = pItem->row();
+    QTableWidgetItem *pNum = ui->tableWidget->item(row, 0);
+    int num = pNum->text().toInt();
+    int lang_id = m_langTable.get(m_config.lang());
+    m_numberTable.updateItem(&m_db, num, exp, lang_id);
+  }
+}
+
 void MainWindow::showTable(const int &lang_id) {
-  int nItems=m_numberTable.retrieve(&m_db, lang_id);
+  int nItems = m_numberTable.retrieve(&m_db, lang_id);
   ui->tableWidget->setRowCount(0);
-  if(nItems<=0){
+  if (nItems <= 0) {
     return;
   }
   QList<int> keyList = m_numberTable.keys();
@@ -69,7 +82,6 @@ void MainWindow::showTable(const int &lang_id) {
   QStringList header;
   header << "Number"
          << "Lang";
-
 
   ui->tableWidget->setColumnCount(header.count());
   ui->tableWidget->setHorizontalHeaderLabels(header);

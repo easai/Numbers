@@ -22,6 +22,7 @@ public:
 private slots:
     void setLang();
     void saveItem();
+    void updateItem();
     void about();
 
 private:

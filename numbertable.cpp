@@ -46,19 +46,40 @@ QString NumberTable::get(int key) {
   return val;
 }
 
-QString NumberTable::saveItem(QSqlDatabase *db, int num, const QString& exp, int lang_id, const QString& lang)
-{
+QString NumberTable::createItem(QSqlDatabase *db, int num, const QString &exp,
+                                int lang_id, const QString &lang) {
   if (!db->open()) {
     qInfo() << db->lastError().text();
     return 0;
   }
   QSqlQuery query(*db);
-  QString sql = "INSERT INTO `numbers` (value, expression, lang_id, language) VALUES (:num, :exp, :lang_id, :lang)";
+  QString sql = "INSERT INTO `numbers` (value, expression, lang_id, language) "
+                "VALUES (:num, :exp, :lang_id, :lang)";
   query.prepare(sql);
   query.bindValue(":lang_id", lang_id);
   query.bindValue(":num", num);
   query.bindValue(":exp", exp);
   query.bindValue(":lang", lang);
+  if (!query.exec()) {
+    qInfo() << db->lastError().text();
+    qInfo() << query.lastError().text();
+  }
+  db->close();
+}
+
+void NumberTable::updateItem(QSqlDatabase *db, int num, const QString &exp,
+                             int lang_id) {
+  if (!db->open()) {
+    qInfo() << db->lastError().text();
+    return;
+  }
+  QSqlQuery query(*db);
+  QString sql = "UPDATE `numbers` SET expression=:exp WHERE lang_id=:lang_id "
+                "AND value=:num";
+  query.prepare(sql);
+  query.bindValue(":lang_id", lang_id);
+  query.bindValue(":num", num);
+  query.bindValue(":exp", exp);
   if (!query.exec()) {
     qInfo() << db->lastError().text();
     qInfo() << query.lastError().text();
