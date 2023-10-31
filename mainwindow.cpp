@@ -9,6 +9,8 @@ MainWindow::MainWindow(QWidget *parent)
   ui->setupUi(this);
   connect(ui->comboBox, &QComboBox::currentIndexChanged, this,
           &MainWindow::setLang);
+  connect(ui->pushButton_save, &QPushButton::clicked, this,
+          &MainWindow::saveItem);
   connect(ui->action_Quit, &QAction::triggered, this, &QApplication::quit);
   m_db = QSqlDatabase::addDatabase("QODBC", "linguistics");
   m_db.setDatabaseName("linguistics");
@@ -33,8 +35,22 @@ void MainWindow::setLang() {
   showTable(lang_id);
 }
 
+void MainWindow::saveItem()
+{
+  QString num=ui->lineEdit_num->text();
+  QString exp=ui->lineEdit_exp->text();
+  QString lang = ui->comboBox->currentText();
+  int lang_id=m_langTable.get(lang);
+  m_numberTable.saveItem(&m_db, num.toInt(), exp, lang_id, lang);
+  showTable(lang_id);
+}
+
 void MainWindow::showTable(const int &lang_id) {
-  m_numberTable.retrieve(&m_db, lang_id);
+  int nItems=m_numberTable.retrieve(&m_db, lang_id);
+  ui->tableWidget->setRowCount(0);
+  if(nItems<=0){
+    return;
+  }
   QList<int> keyList = m_numberTable.keys();
   std::sort(keyList.begin(), keyList.end());
 
@@ -42,7 +58,6 @@ void MainWindow::showTable(const int &lang_id) {
   header << "Number"
          << "Lang";
 
-  ui->tableWidget->setRowCount(0);
 
   ui->tableWidget->setColumnCount(header.count());
   ui->tableWidget->setHorizontalHeaderLabels(header);

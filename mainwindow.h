@@ -20,6 +20,7 @@ public:
 
 private slots:
     void setLang();
+    void saveItem();
 
 private:
     Ui::MainWindow *ui;

@@ -9,12 +9,13 @@ class NumberTable : public QObject {
 public:
   NumberTable(QObject *parent = nullptr);
 
-  void retrieve(QSqlDatabase *db, int lang_id);
+  int retrieve(QSqlDatabase *db, int lang_id);
 
   QHash<int, QString> table() const;
 
   QList<int> keys();
   QString get(int key);
+  QString saveItem(QSqlDatabase *db, int num, const QString& exp, int lang_id, const QString& lang);
 
 private:
   QHash<int, QString> m_table;

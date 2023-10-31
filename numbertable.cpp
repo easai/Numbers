@@ -6,10 +6,11 @@
 
 NumberTable::NumberTable(QObject *parent) {}
 
-void NumberTable::retrieve(QSqlDatabase *db, int lang_id) {
+int NumberTable::retrieve(QSqlDatabase *db, int lang_id) {
+  m_table.clear();
   if (!db->open()) {
     qInfo() << db->lastError().text();
-    return;
+    return 0;
   }
   QSqlQuery query(*db);
   QString sql = "SELECT id, value, expression, kana FROM `numbers` WHERE "
@@ -29,6 +30,7 @@ void NumberTable::retrieve(QSqlDatabase *db, int lang_id) {
     }
   }
   db->close();
+  return m_table.size();
 }
 
 QHash<int, QString> NumberTable::table() const { return m_table; }
@@ -42,4 +44,24 @@ QString NumberTable::get(int key) {
     val = i.value();
   }
   return val;
+}
+
+QString NumberTable::saveItem(QSqlDatabase *db, int num, const QString& exp, int lang_id, const QString& lang)
+{
+  if (!db->open()) {
+    qInfo() << db->lastError().text();
+    return 0;
+  }
+  QSqlQuery query(*db);
+  QString sql = "INSERT INTO `numbers` (value, expression, lang_id, language) VALUES (:num, :exp, :lang_id, :lang)";
+  query.prepare(sql);
+  query.bindValue(":lang_id", lang_id);
+  query.bindValue(":num", num);
+  query.bindValue(":exp", exp);
+  query.bindValue(":lang", lang);
+  if (!query.exec()) {
+    qInfo() << db->lastError().text();
+    qInfo() << query.lastError().text();
+  }
+  db->close();
 }
