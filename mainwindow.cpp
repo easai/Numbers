@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "config.h"
 #include "./ui_mainwindow.h"
 
 #include <QtAlgorithms>
@@ -15,10 +16,15 @@ MainWindow::MainWindow(QWidget *parent)
   m_db = QSqlDatabase::addDatabase("QODBC", "linguistics");
   m_db.setDatabaseName("linguistics");
   initLang();
-  showTable(1);
+  m_config.load();
+  QString defaultLang=m_config.lang();
+  ui->comboBox->setCurrentText(defaultLang);
 }
 
-MainWindow::~MainWindow() { delete ui; }
+MainWindow::~MainWindow() {
+  m_config.save();
+  delete ui;
+}
 
 void MainWindow::initLang() {
   m_langTable.retrieve(&m_db);
@@ -29,9 +35,11 @@ void MainWindow::initLang() {
   }
 }
 
+
 void MainWindow::setLang() {
   QString lang = ui->comboBox->currentText();
   int lang_id = m_langTable.get(lang);
+  m_config.setLang(lang);
   showTable(lang_id);
 }
 

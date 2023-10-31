@@ -4,7 +4,7 @@
 #include <QSqlQuery>
 #include <QtSql>
 
-NumberTable::NumberTable(QObject *parent) {}
+NumberTable::NumberTable(QObject *parent) : QObject{parent} {}
 
 int NumberTable::retrieve(QSqlDatabase *db, int lang_id) {
   m_table.clear();

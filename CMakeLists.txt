@@ -25,6 +25,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         numbertable.h numbertable.cpp
         langtable.h langtable.cpp
+        config.h config.cpp
+        configdialog.h configdialog.cpp configdialog.ui
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET Numbers APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

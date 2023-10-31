@@ -3,6 +3,7 @@
 
 #include "numbertable.h"
 #include "langtable.h"
+#include "config.h"
 #include <QMainWindow>
 #include <QSqlDatabase>
 
@@ -27,6 +28,7 @@ private:
     NumberTable m_numberTable;
     QSqlDatabase m_db;
     LangTable m_langTable;
+    Config m_config;
 
     void initLang();
 
