@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
   m_db.setDatabaseName("linguistics");
   initLang();
   m_config.load();
+  restoreGeometry(m_config.geom());
 
   QString defaultLang = m_config.lang();
   ui->comboBox->setCurrentText(defaultLang);
@@ -29,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 MainWindow::~MainWindow() {
+  m_config.setGeom(saveGeometry());
   m_config.save();
   delete ui;
 }

@@ -7,6 +7,7 @@
 #define APPNAME "Numbers"
 #define GENERAL "General"
 #define LANG "Lang"
+#define GEOM "Geometry"
 
 class Config : public QObject {
   Q_OBJECT
@@ -24,13 +25,17 @@ public:
   void load();
   void save();
 
+  // getters and setters
+  QString lang() const;
   void setLang(const QString &newLang);
 
-  QString lang() const;
+  QByteArray geom() const;
+  void setGeom(const QByteArray &newGeom);
 
 signals:
 private:
   QString m_lang;
+  QByteArray m_geom;
 };
 
 #endif // CONFIG_H
