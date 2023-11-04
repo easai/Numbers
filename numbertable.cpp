@@ -46,11 +46,11 @@ QString NumberTable::get(int key) {
   return val;
 }
 
-QString NumberTable::createItem(QSqlDatabase *db, int num, const QString &exp,
+void NumberTable::createItem(QSqlDatabase *db, int num, const QString &exp,
                                 int lang_id, const QString &lang) {
   if (!db->open()) {
     qInfo() << db->lastError().text();
-    return 0;
+    return;
   }
   QSqlQuery query(*db);
   QString sql = "INSERT INTO `numbers` (value, expression, lang_id, language) "

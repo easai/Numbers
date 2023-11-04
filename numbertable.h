@@ -15,7 +15,7 @@ public:
 
   QList<int> keys();
   QString get(int key);
-  QString createItem(QSqlDatabase *db, int num, const QString& exp, int lang_id, const QString& lang);
+  void createItem(QSqlDatabase *db, int num, const QString& exp, int lang_id, const QString& lang);
   void updateItem(QSqlDatabase *db, int num, const QString& exp, int lang_id);
 
 private:
