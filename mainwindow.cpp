@@ -92,7 +92,7 @@ void MainWindow::showTable(const int &lang_id) {
 
   QStringList header;
   header << "Number"
-         << "Lang";
+         << m_langTable.getEn(lang_id);
 
   for (QTableWidget *pTableWidget : m_tableWidget) {
     pTableWidget->setRowCount(0);
