@@ -50,12 +50,7 @@ QHash<int, QString> NumberTable::table() const { return m_table; }
 QList<int> NumberTable::keys() { return m_table.keys(); }
 
 QString NumberTable::get(int key) {
-  QString val = "";
-  QHash<int, QString>::iterator i = m_table.find(key);
-  if (i != m_table.end() && i.key() == key) {
-    val = i.value();
-  }
-  return val;
+  return m_table[key];
 }
 
 void NumberTable::createItem(QSqlDatabase *db, int num, const QString &exp,
@@ -97,6 +92,11 @@ void NumberTable::updateItem(QSqlDatabase *db, int num, const QString &exp,
     qInfo() << query.lastError().text();
   }
   db->close();
+}
+
+bool NumberTable::contains(int key)
+{
+  return m_table.contains(key);
 }
 
 int NumberTable::lang_id() const { return m_lang_id; }

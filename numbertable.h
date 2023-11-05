@@ -16,15 +16,17 @@ public:
   QHash<int, QString> table() const;
 
   QList<int> keys();
-  QString get(int key);
+  QString get(int key) const;
   void createItem(QSqlDatabase *db, int num, const QString &exp, int lang_id,
                   const QString &lang);
   void updateItem(QSqlDatabase *db, int num, const QString &exp, int lang_id);
+  bool contains(int key) const;
 
+  // Getters/Setters
   int lang_id() const;
   void setLang_id(int newLang_id);
 
-  private:
+private:
   int m_lang_id=-1;
   QHash<int, QString> m_table;
 };

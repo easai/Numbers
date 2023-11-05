@@ -17,9 +17,9 @@ MainWindow::MainWindow(QWidget *parent)
   m_tableWidget.append(ui->tableWidget_1000);
   setWindowIcon(QIcon("://images/numbers-favicon.ico"));
   connect(ui->comboBox, &QComboBox::currentIndexChanged, this,
-          &MainWindow::setLang);
+          &MainWindow::setSelectedLang);
   connect(ui->pushButton_save, &QPushButton::clicked, this,
-          &MainWindow::saveItem);
+          &MainWindow::createItem);
   connect(ui->action_About_Numbers, &QAction::triggered, this,
           &MainWindow::about);
   connect(ui->action_Quit, &QAction::triggered, this, &QApplication::quit);
@@ -54,10 +54,14 @@ void MainWindow::initLang() {
   }
 }
 
-void MainWindow::setLang() {
+void MainWindow::setSelectedLang() {
   QString lang = ui->comboBox->currentText();
   int lang_id = m_langTable.get(lang);
   m_config.setLang(lang);
+  NumberTable table;
+  table.retrieve(&m_db, lang_id);
+  m_numberTableList.clear();
+  m_numberTableList.append(table);
   showTable(lang_id);
 }
 
@@ -68,27 +72,31 @@ void MainWindow::updateLang() {
   QString lang = QInputDialog::getItem(this, tr("Select language"), tr("en"),
                                        lst, 0, false, &ok);
   if (ok) {
-    int lang_id=m_langTable.get(lang);
+    int lang_id = m_langTable.get(lang);
     NumberTable table;
     table.retrieve(&m_db, lang_id);
     int tabIndex = ui->tabWidget->currentIndex();
     QTableWidget *pTableWidget = m_tableWidget[tabIndex];
-    int col=pTableWidget->horizontalHeader()->currentIndex().column();
-    if (m_numberTableList.size() <= col - 2) {
+    int col = pTableWidget->horizontalHeader()->currentIndex().column();
+    if (m_numberTableList.size() <= col - 1) {
       m_numberTableList.append(table);
     } else {
-      m_numberTableList.replace(col - 2, table);
+      m_numberTableList.replace(col - 1, table);
     }
-    setLang();
+    int selected_id = m_langTable.get(this->m_config.lang());
+    showTable(selected_id);
   }
 }
 
-void MainWindow::saveItem() {
+void MainWindow::createItem() {
+  if (m_numberTableList.size() == 0) {
+    return;
+  }
   QString num = ui->lineEdit_num->text();
   QString exp = ui->lineEdit_exp->text();
   QString lang = ui->comboBox->currentText();
   int lang_id = m_langTable.get(lang);
-  m_numberTable.createItem(&m_db, num.toInt(), exp, lang_id, lang);
+  m_numberTableList[0].createItem(&m_db, num.toInt(), exp, lang_id, lang);
   showTable(lang_id);
 }
 
@@ -101,25 +109,33 @@ void MainWindow::updateItem() {
     int row = pItem->row();
     QTableWidgetItem *pNum = pTableWidget->item(row, 0);
     int num = pNum->text().toInt();
-    int lang_id = m_langTable.get(m_config.lang());
-    m_numberTable.updateItem(&m_db, num, exp, lang_id);
+    int col = pItem->column();
+    NumberTable table = m_numberTableList[col - 1];
+    int lang_id = table.lang_id();
+    if (table.contains(num)) {
+      table.updateItem(&m_db, num, exp, lang_id);
+    } else {
+      QString lang = m_langTable.getEn(lang_id);
+      table.createItem(&m_db, num, exp, lang_id, lang);
+    }
   }
 }
 
 void MainWindow::showTable(const int &lang_id) {
-  int nItems = m_numberTable.retrieve(&m_db, lang_id);
-
-  if (nItems <= 0) {
+  if (m_numberTableList.size() == 0 ||
+      m_numberTableList[0].keys().size() == 0) {
     return;
   }
-  QList<int> keyList = m_numberTable.keys();
+  NumberTable numberTable = m_numberTableList[0];
+  QList<int> keyList = numberTable.keys();
   std::sort(keyList.begin(), keyList.end());
 
+  // set header
   QStringList header;
-  header << "Number" << m_langTable.getEn(lang_id);
-  for (int i = 0; i < m_numberTableList.size(); i++) {
-    QString lang="";
-    int lang_id = m_numberTableList[i].lang_id();
+  header << "Number";
+  for (const NumberTable& table : m_numberTableList) {
+    QString lang = "";
+    int lang_id = table.lang_id();
     lang = m_langTable.getEn(lang_id);
     header << lang;
   }
@@ -132,11 +148,10 @@ void MainWindow::showTable(const int &lang_id) {
     pTableWidget->verticalHeader()->setVisible(false);
   }
 
+  // set table
   QTableWidget *pTableWidget;
   for (int i = 0; i < keyList.count(); i++) {
     int key = keyList.at(i);
-    QString val = m_numberTable.get(key);
-
     if (key <= 10) {
       pTableWidget = ui->tableWidget_10;
     } else if (key < 20) {
@@ -153,12 +168,12 @@ void MainWindow::showTable(const int &lang_id) {
     QTableWidgetItem *targetItem =
         new QTableWidgetItem(QVariant(key).toString());
     pTableWidget->setItem(row, 0, targetItem);
-    QTableWidgetItem *descItem = new QTableWidgetItem(val);
-    pTableWidget->setItem(row, 1, descItem);
-    int col = 1;
-    for (int i = 0; i < m_numberTableList.size(); i++) {
-        QString exp=m_numberTableList[i].get(key);
+    int col = 0;
+    for (const NumberTable& table : m_numberTableList) {
+      if (table.contains(key)) {
+        QString exp = table.get(key);
         pTableWidget->setItem(row, ++col, new QTableWidgetItem(exp));
+      }
     }
   }
 }

@@ -22,15 +22,14 @@ public:
   ~MainWindow();
 
 private slots:
-  void setLang();
+  void setSelectedLang();
   void updateLang();
-  void saveItem();
+  void createItem();
   void updateItem();
   void about();
 
 private:
   Ui::MainWindow *ui;
-  NumberTable m_numberTable;
   QList<NumberTable> m_numberTableList;
   QSqlDatabase m_db;
   LangTable m_langTable;
