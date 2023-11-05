@@ -6,7 +6,19 @@
 
 NumberTable::NumberTable(QObject *parent) : QObject{parent} {}
 
+NumberTable::NumberTable(const NumberTable &o)
+    : m_table(o.m_table), m_lang_id(o.m_lang_id) {}
+
+NumberTable &NumberTable::operator=(const NumberTable &o) {
+  if (this != &o) {
+    m_table = o.m_table;
+    m_lang_id = o.m_lang_id;
+  }
+  return *this;
+}
+
 int NumberTable::retrieve(QSqlDatabase *db, int lang_id) {
+  m_lang_id = lang_id;
   m_table.clear();
   if (!db->open()) {
     qInfo() << db->lastError().text();
@@ -47,7 +59,7 @@ QString NumberTable::get(int key) {
 }
 
 void NumberTable::createItem(QSqlDatabase *db, int num, const QString &exp,
-                                int lang_id, const QString &lang) {
+                             int lang_id, const QString &lang) {
   if (!db->open()) {
     qInfo() << db->lastError().text();
     return;
@@ -86,3 +98,7 @@ void NumberTable::updateItem(QSqlDatabase *db, int num, const QString &exp,
   }
   db->close();
 }
+
+int NumberTable::lang_id() const { return m_lang_id; }
+
+void NumberTable::setLang_id(int newLang_id) { m_lang_id = newLang_id; }

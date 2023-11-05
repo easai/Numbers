@@ -11,7 +11,7 @@ public:
   explicit LangTable(QObject *parent = nullptr);
 
   void retrieve(QSqlDatabase *db);
-  QList<QString> keys();
+  QStringList keys();
   int get(const QString &key);
   QString getEn(int idx);
 

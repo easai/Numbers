@@ -8,6 +8,8 @@
 class NumberTable : public QObject {
 public:
   NumberTable(QObject *parent = nullptr);
+  NumberTable(const NumberTable &);
+  NumberTable &operator=(const NumberTable &);
 
   int retrieve(QSqlDatabase *db, int lang_id);
 
@@ -15,10 +17,15 @@ public:
 
   QList<int> keys();
   QString get(int key);
-  void createItem(QSqlDatabase *db, int num, const QString& exp, int lang_id, const QString& lang);
-  void updateItem(QSqlDatabase *db, int num, const QString& exp, int lang_id);
+  void createItem(QSqlDatabase *db, int num, const QString &exp, int lang_id,
+                  const QString &lang);
+  void updateItem(QSqlDatabase *db, int num, const QString &exp, int lang_id);
 
-private:
+  int lang_id() const;
+  void setLang_id(int newLang_id);
+
+  private:
+  int m_lang_id=-1;
   QHash<int, QString> m_table;
 };
 

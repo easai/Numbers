@@ -29,20 +29,10 @@ void LangTable::retrieve(QSqlDatabase *db) {
   db->close();
 }
 
-QList<QString> LangTable::keys() { return m_indexTable.keys(); }
+QStringList LangTable::keys() { return m_indexTable.keys(); }
 
-int LangTable::get(const QString &key) {
-  int val = 0;
-  QHash<QString, int>::iterator i = m_indexTable.find(key);
-  if (i != m_indexTable.end() && i.key() == key) {
-    val = i.value();
-  }
-  return val;
-}
+int LangTable::get(const QString &key) { return m_indexTable[key]; }
 
-QString LangTable::getEn(int idx)
-{
-  return m_table[idx];
-}
+QString LangTable::getEn(int idx) { return m_table[idx]; }
 
 QHash<QString, int> LangTable::table() const { return m_indexTable; }

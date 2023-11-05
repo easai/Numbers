@@ -3,6 +3,7 @@
 #include "aboutdialog.h"
 #include "config.h"
 
+#include <QInputDialog>
 #include <QtAlgorithms>
 #include <algorithm>
 
@@ -33,6 +34,8 @@ MainWindow::MainWindow(QWidget *parent)
   for (QTableWidget *pTableWidget : m_tableWidget) {
     connect(pTableWidget, &QTableWidget::cellChanged, this,
             &MainWindow::updateItem);
+    connect(pTableWidget->horizontalHeader(), &QHeaderView::sectionClicked,
+            this, &MainWindow::updateLang);
   }
 }
 
@@ -56,6 +59,28 @@ void MainWindow::setLang() {
   int lang_id = m_langTable.get(lang);
   m_config.setLang(lang);
   showTable(lang_id);
+}
+
+void MainWindow::updateLang() {
+  QStringList lst = m_langTable.keys();
+  lst.sort();
+  bool ok;
+  QString lang = QInputDialog::getItem(this, tr("Select language"), tr("en"),
+                                       lst, 0, false, &ok);
+  if (ok) {
+    int lang_id=m_langTable.get(lang);
+    NumberTable table;
+    table.retrieve(&m_db, lang_id);
+    int tabIndex = ui->tabWidget->currentIndex();
+    QTableWidget *pTableWidget = m_tableWidget[tabIndex];
+    int col=pTableWidget->horizontalHeader()->currentIndex().column();
+    if (m_numberTableList.size() <= col - 2) {
+      m_numberTableList.append(table);
+    } else {
+      m_numberTableList.replace(col - 2, table);
+    }
+    setLang();
+  }
 }
 
 void MainWindow::saveItem() {
@@ -91,8 +116,14 @@ void MainWindow::showTable(const int &lang_id) {
   std::sort(keyList.begin(), keyList.end());
 
   QStringList header;
-  header << "Number"
-         << m_langTable.getEn(lang_id);
+  header << "Number" << m_langTable.getEn(lang_id);
+  for (int i = 0; i < m_numberTableList.size(); i++) {
+    QString lang="";
+    int lang_id = m_numberTableList[i].lang_id();
+    lang = m_langTable.getEn(lang_id);
+    header << lang;
+  }
+  header << "";
 
   for (QTableWidget *pTableWidget : m_tableWidget) {
     pTableWidget->setRowCount(0);
@@ -124,6 +155,11 @@ void MainWindow::showTable(const int &lang_id) {
     pTableWidget->setItem(row, 0, targetItem);
     QTableWidgetItem *descItem = new QTableWidgetItem(val);
     pTableWidget->setItem(row, 1, descItem);
+    int col = 1;
+    for (int i = 0; i < m_numberTableList.size(); i++) {
+        QString exp=m_numberTableList[i].get(key);
+        pTableWidget->setItem(row, ++col, new QTableWidgetItem(exp));
+    }
   }
 }
 

@@ -23,6 +23,7 @@ public:
 
 private slots:
   void setLang();
+  void updateLang();
   void saveItem();
   void updateItem();
   void about();
@@ -30,6 +31,7 @@ private slots:
 private:
   Ui::MainWindow *ui;
   NumberTable m_numberTable;
+  QList<NumberTable> m_numberTableList;
   QSqlDatabase m_db;
   LangTable m_langTable;
   Config m_config;
@@ -37,7 +39,7 @@ private:
   QList<QTableWidget *> m_tableWidget;
 
   void initLang();
-
   void showTable(const int &lang_id);
+
 };
 #endif // MAINWINDOW_H
