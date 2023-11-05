@@ -9,6 +9,11 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
+  m_tableWidget.append(ui->tableWidget_10);
+  m_tableWidget.append(ui->tableWidget_19);
+  m_tableWidget.append(ui->tableWidget_99);
+  m_tableWidget.append(ui->tableWidget_100);
+  m_tableWidget.append(ui->tableWidget_1000);
   setWindowIcon(QIcon("://images/numbers-favicon.ico"));
   connect(ui->comboBox, &QComboBox::currentIndexChanged, this,
           &MainWindow::setLang);
@@ -25,8 +30,10 @@ MainWindow::MainWindow(QWidget *parent)
 
   QString defaultLang = m_config.lang();
   ui->comboBox->setCurrentText(defaultLang);
-  connect(ui->tableWidget, &QTableWidget::cellChanged, this,
-          &MainWindow::updateItem);
+  for (QTableWidget *pTableWidget : m_tableWidget) {
+    connect(pTableWidget, &QTableWidget::cellChanged, this,
+            &MainWindow::updateItem);
+  }
 }
 
 MainWindow::~MainWindow() {
@@ -61,11 +68,13 @@ void MainWindow::saveItem() {
 }
 
 void MainWindow::updateItem() {
-  QList<QTableWidgetItem *> lst = ui->tableWidget->selectedItems();
+  int tabIndex = ui->tabWidget->currentIndex();
+  QTableWidget *pTableWidget = m_tableWidget[tabIndex];
+  QList<QTableWidgetItem *> lst = pTableWidget->selectedItems();
   for (QTableWidgetItem *pItem : lst) {
     QString exp = pItem->text();
     int row = pItem->row();
-    QTableWidgetItem *pNum = ui->tableWidget->item(row, 0);
+    QTableWidgetItem *pNum = pTableWidget->item(row, 0);
     int num = pNum->text().toInt();
     int lang_id = m_langTable.get(m_config.lang());
     m_numberTable.updateItem(&m_db, num, exp, lang_id);
@@ -74,7 +83,7 @@ void MainWindow::updateItem() {
 
 void MainWindow::showTable(const int &lang_id) {
   int nItems = m_numberTable.retrieve(&m_db, lang_id);
-  ui->tableWidget->setRowCount(0);
+
   if (nItems <= 0) {
     return;
   }
@@ -85,20 +94,36 @@ void MainWindow::showTable(const int &lang_id) {
   header << "Number"
          << "Lang";
 
-  ui->tableWidget->setColumnCount(header.count());
-  ui->tableWidget->setHorizontalHeaderLabels(header);
-  ui->tableWidget->verticalHeader()->setVisible(false);
+  for (QTableWidget *pTableWidget : m_tableWidget) {
+    pTableWidget->setRowCount(0);
+    pTableWidget->setColumnCount(header.count());
+    pTableWidget->setHorizontalHeaderLabels(header);
+    pTableWidget->verticalHeader()->setVisible(false);
+  }
 
+  QTableWidget *pTableWidget;
   for (int i = 0; i < keyList.count(); i++) {
     int key = keyList.at(i);
     QString val = m_numberTable.get(key);
 
-    ui->tableWidget->insertRow(i);
+    if (key <= 10) {
+      pTableWidget = ui->tableWidget_10;
+    } else if (key < 20) {
+      pTableWidget = ui->tableWidget_19;
+    } else if (key < 100) {
+      pTableWidget = ui->tableWidget_99;
+    } else if (key < 1000) {
+      pTableWidget = ui->tableWidget_100;
+    } else {
+      pTableWidget = ui->tableWidget_1000;
+    }
+    int row = pTableWidget->rowCount();
+    pTableWidget->insertRow(row);
     QTableWidgetItem *targetItem =
         new QTableWidgetItem(QVariant(key).toString());
-    ui->tableWidget->setItem(i, 0, targetItem);
+    pTableWidget->setItem(row, 0, targetItem);
     QTableWidgetItem *descItem = new QTableWidgetItem(val);
-    ui->tableWidget->setItem(i, 1, descItem);
+    pTableWidget->setItem(row, 1, descItem);
   }
 }
 

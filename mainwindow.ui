@@ -36,7 +36,61 @@
      </layout>
     </item>
     <item>
-     <widget class="QTableWidget" name="tableWidget"/>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>4</number>
+      </property>
+      <widget class="QWidget" name="tab_10">
+       <attribute name="title">
+        <string>0-10</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QTableWidget" name="tableWidget_10"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_19">
+       <attribute name="title">
+        <string>11-19</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QTableWidget" name="tableWidget_19"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_99">
+       <attribute name="title">
+        <string>20-99</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QTableWidget" name="tableWidget_99"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_100">
+       <attribute name="title">
+        <string>100-999</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <widget class="QTableWidget" name="tableWidget_100"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_1000">
+       <attribute name="title">
+        <string>1000-</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <widget class="QTableWidget" name="tableWidget_1000"/>
+        </item>
+       </layout>
+      </widget>
+     </widget>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
