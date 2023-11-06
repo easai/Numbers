@@ -187,11 +187,11 @@ void MainWindow::showTable() {
     QTableWidgetItem *targetItem =
         new QTableWidgetItem(QVariant(key).toString());
     pTableWidget->setItem(row, 0, targetItem);
-    int col = 0;
-    for (const NumberTable &table : m_tableList) {
+    for (int i = 0; i < m_tableList.size(); i++) {
+      NumberTable table = m_tableList[i];
       if (table.contains(key)) {
         QString exp = table.getExp(key);
-        pTableWidget->setItem(row, ++col, new QTableWidgetItem(exp));
+        pTableWidget->setItem(row, i + 1, new QTableWidgetItem(exp));
       }
     }
   }
