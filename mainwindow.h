@@ -30,7 +30,7 @@ private slots:
 
 private:
   Ui::MainWindow *ui;
-  QList<NumberTable> m_numberTableList;
+  QList<NumberTable> m_tableList;
   QSqlDatabase m_db;
   LangTable m_langTable;
   Config m_config;
@@ -38,7 +38,6 @@ private:
   QList<QTableWidget *> m_tableWidget;
 
   void initLang();
-  void showTable(const int &lang_id);
-
+  void showTable();
 };
 #endif // MAINWINDOW_H

@@ -17,27 +17,30 @@ NumberTable &NumberTable::operator=(const NumberTable &o) {
   return *this;
 }
 
-int NumberTable::retrieve(QSqlDatabase *db, int lang_id) {
-  m_lang_id = lang_id;
+int NumberTable::retrieve(QSqlDatabase *db) {
   m_table.clear();
+  if (m_lang_id == -1) {
+    return 0;
+  }
   if (!db->open()) {
     qInfo() << db->lastError().text();
     return 0;
   }
   QSqlQuery query(*db);
-  QString sql = "SELECT id, value, expression, kana FROM `numbers` WHERE "
+  QString sql = "SELECT value, expression, kana FROM `numbers` WHERE "
                 "lang_id=:lang_id";
   query.prepare(sql);
-  query.bindValue(":lang_id", lang_id);
+  query.bindValue(":lang_id", m_lang_id);
   if (!query.exec()) {
     qInfo() << db->lastError().text();
     qInfo() << query.lastError().text();
   } else {
+    int idx = -1;
     while (query.next()) {
-      QString id = query.value(0).toString();
-      QString val = query.value(1).toString();
-      QString exp = query.value(2).toString();
-      QString ipa = query.value(3).toString();
+      idx = -1;
+      QString val = query.value(++idx).toString();
+      QString exp = query.value(++idx).toString();
+      QString ipa = query.value(++idx).toString();
       m_table.insert(val.toInt(), exp);
     }
   }
@@ -49,9 +52,7 @@ QHash<int, QString> NumberTable::table() const { return m_table; }
 
 QList<int> NumberTable::keys() { return m_table.keys(); }
 
-QString NumberTable::get(int key) {
-  return m_table[key];
-}
+QString NumberTable::getExp(int key) const { return m_table[key]; }
 
 void NumberTable::createItem(QSqlDatabase *db, int num, const QString &exp,
                              int lang_id, const QString &lang) {
@@ -94,10 +95,7 @@ void NumberTable::updateItem(QSqlDatabase *db, int num, const QString &exp,
   db->close();
 }
 
-bool NumberTable::contains(int key)
-{
-  return m_table.contains(key);
-}
+bool NumberTable::contains(int key) const { return m_table.contains(key); }
 
 int NumberTable::lang_id() const { return m_lang_id; }
 

@@ -11,12 +11,12 @@ public:
   NumberTable(const NumberTable &);
   NumberTable &operator=(const NumberTable &);
 
-  int retrieve(QSqlDatabase *db, int lang_id);
+  int retrieve(QSqlDatabase *db);
 
   QHash<int, QString> table() const;
 
   QList<int> keys();
-  QString get(int key) const;
+  QString getExp(int key) const;
   void createItem(QSqlDatabase *db, int num, const QString &exp, int lang_id,
                   const QString &lang);
   void updateItem(QSqlDatabase *db, int num, const QString &exp, int lang_id);
@@ -27,7 +27,7 @@ public:
   void setLang_id(int newLang_id);
 
 private:
-  int m_lang_id=-1;
+  int m_lang_id = -1;
   QHash<int, QString> m_table;
 };
 

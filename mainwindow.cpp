@@ -16,8 +16,6 @@ MainWindow::MainWindow(QWidget *parent)
   m_tableWidget.append(ui->tableWidget_100);
   m_tableWidget.append(ui->tableWidget_1000);
   setWindowIcon(QIcon("://images/numbers-favicon.ico"));
-  connect(ui->comboBox, &QComboBox::currentIndexChanged, this,
-          &MainWindow::setSelectedLang);
   connect(ui->pushButton_save, &QPushButton::clicked, this,
           &MainWindow::createItem);
   connect(ui->action_About_Numbers, &QAction::triggered, this,
@@ -28,7 +26,13 @@ MainWindow::MainWindow(QWidget *parent)
   initLang();
   m_config.load();
   restoreGeometry(m_config.geom());
-
+  m_tableList.clear();
+  for (int i : m_config.langList()) {
+    NumberTable table;
+    table.setLang_id(i);
+    m_tableList.append(table);
+  }
+  showTable();
   QString defaultLang = m_config.lang();
   ui->comboBox->setCurrentText(defaultLang);
   for (QTableWidget *pTableWidget : m_tableWidget) {
@@ -37,9 +41,17 @@ MainWindow::MainWindow(QWidget *parent)
     connect(pTableWidget->horizontalHeader(), &QHeaderView::sectionClicked,
             this, &MainWindow::updateLang);
   }
+  connect(ui->comboBox, &QComboBox::currentIndexChanged, this,
+          &MainWindow::setSelectedLang);
 }
 
 MainWindow::~MainWindow() {
+  QList<int> langList;
+  for (NumberTable table : m_tableList) {
+    int lang_id = table.lang_id();
+    langList.append(lang_id);
+  }
+  m_config.setLangList(langList);
   m_config.setGeom(saveGeometry());
   m_config.save();
   delete ui;
@@ -59,45 +71,51 @@ void MainWindow::setSelectedLang() {
   int lang_id = m_langTable.get(lang);
   m_config.setLang(lang);
   NumberTable table;
-  table.retrieve(&m_db, lang_id);
-  m_numberTableList.clear();
-  m_numberTableList.append(table);
-  showTable(lang_id);
+  table.setLang_id(lang_id);
+  m_tableList.clear();
+  m_tableList.append(table);
+  showTable();
 }
 
 void MainWindow::updateLang() {
   QStringList lst = m_langTable.keys();
+  lst.append("-");
   lst.sort();
   bool ok;
   QString lang = QInputDialog::getItem(this, tr("Select language"), tr("en"),
                                        lst, 0, false, &ok);
   if (ok) {
-    int lang_id = m_langTable.get(lang);
-    NumberTable table;
-    table.retrieve(&m_db, lang_id);
     int tabIndex = ui->tabWidget->currentIndex();
     QTableWidget *pTableWidget = m_tableWidget[tabIndex];
     int col = pTableWidget->horizontalHeader()->currentIndex().column();
-    if (m_numberTableList.size() <= col - 1) {
-      m_numberTableList.append(table);
+    if (lang == "-") {
+      if (col - 1 < m_tableList.size()) {
+        m_tableList.removeAt(col - 1);
+      }
     } else {
-      m_numberTableList.replace(col - 1, table);
+      NumberTable table;
+      int lang_id = m_langTable.get(lang);
+      table.setLang_id(lang_id);
+      if (m_tableList.size() <= col - 1) {
+        m_tableList.append(table);
+      } else {
+        m_tableList.replace(col - 1, table);
+      }
     }
-    int selected_id = m_langTable.get(this->m_config.lang());
-    showTable(selected_id);
+    showTable();
   }
 }
 
 void MainWindow::createItem() {
-  if (m_numberTableList.size() == 0) {
+  if (m_tableList.size() == 0) {
     return;
   }
   QString num = ui->lineEdit_num->text();
   QString exp = ui->lineEdit_exp->text();
   QString lang = ui->comboBox->currentText();
   int lang_id = m_langTable.get(lang);
-  m_numberTableList[0].createItem(&m_db, num.toInt(), exp, lang_id, lang);
-  showTable(lang_id);
+  m_tableList[0].createItem(&m_db, num.toInt(), exp, lang_id, lang);
+  showTable();
 }
 
 void MainWindow::updateItem() {
@@ -110,7 +128,7 @@ void MainWindow::updateItem() {
     QTableWidgetItem *pNum = pTableWidget->item(row, 0);
     int num = pNum->text().toInt();
     int col = pItem->column();
-    NumberTable table = m_numberTableList[col - 1];
+    NumberTable table = m_tableList[col - 1];
     int lang_id = table.lang_id();
     if (table.contains(num)) {
       table.updateItem(&m_db, num, exp, lang_id);
@@ -121,24 +139,25 @@ void MainWindow::updateItem() {
   }
 }
 
-void MainWindow::showTable(const int &lang_id) {
-  if (m_numberTableList.size() == 0 ||
-      m_numberTableList[0].keys().size() == 0) {
+void MainWindow::showTable() {
+  if (m_tableList.size() == 0) {
     return;
   }
-  NumberTable numberTable = m_numberTableList[0];
-  QList<int> keyList = numberTable.keys();
-  std::sort(keyList.begin(), keyList.end());
 
   // set header
   QStringList header;
   header << "Number";
-  for (const NumberTable& table : m_numberTableList) {
+  for (NumberTable &table : m_tableList) {
     QString lang = "";
     int lang_id = table.lang_id();
+    table.retrieve(&m_db);
     lang = m_langTable.getEn(lang_id);
     header << lang;
   }
+  NumberTable numberTable = m_tableList[0];
+  QList<int> keyList = numberTable.keys();
+  std::sort(keyList.begin(), keyList.end());
+
   header << "";
 
   for (QTableWidget *pTableWidget : m_tableWidget) {
@@ -169,9 +188,9 @@ void MainWindow::showTable(const int &lang_id) {
         new QTableWidgetItem(QVariant(key).toString());
     pTableWidget->setItem(row, 0, targetItem);
     int col = 0;
-    for (const NumberTable& table : m_numberTableList) {
+    for (const NumberTable &table : m_tableList) {
       if (table.contains(key)) {
-        QString exp = table.get(key);
+        QString exp = table.getExp(key);
         pTableWidget->setItem(row, ++col, new QTableWidgetItem(exp));
       }
     }
