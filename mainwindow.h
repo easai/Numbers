@@ -8,6 +8,8 @@
 #include <QSqlDatabase>
 #include <QTableWidget>
 
+#define JSONTAG "LangList"
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -22,10 +24,13 @@ public:
   ~MainWindow();
 
 private slots:
+  void setLangList();
   void setSelectedLang();
   void updateLang();
   void createItem();
   void updateItem();
+  void openFile();
+  void saveFile();
   void about();
 
 private:

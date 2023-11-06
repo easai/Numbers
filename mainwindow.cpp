@@ -3,7 +3,11 @@
 #include "aboutdialog.h"
 #include "config.h"
 
+#include <QFileDialog>
 #include <QInputDialog>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QtAlgorithms>
 #include <algorithm>
 
@@ -18,6 +22,8 @@ MainWindow::MainWindow(QWidget *parent)
   setWindowIcon(QIcon("://images/numbers-favicon.ico"));
   connect(ui->pushButton_save, &QPushButton::clicked, this,
           &MainWindow::createItem);
+  connect(ui->action_Save, &QAction::triggered, this, &MainWindow::saveFile);
+  connect(ui->action_Open, &QAction::triggered, this, &MainWindow::openFile);
   connect(ui->action_About_Numbers, &QAction::triggered, this,
           &MainWindow::about);
   connect(ui->action_Quit, &QAction::triggered, this, &QApplication::quit);
@@ -27,11 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
   m_config.load();
   restoreGeometry(m_config.geom());
   m_tableList.clear();
-  for (int i : m_config.langList()) {
-    NumberTable table;
-    table.setLang_id(i);
-    m_tableList.append(table);
-  }
+  setLangList();
   showTable();
   QString defaultLang = m_config.lang();
   ui->comboBox->setCurrentText(defaultLang);
@@ -55,6 +57,15 @@ MainWindow::~MainWindow() {
   m_config.setGeom(saveGeometry());
   m_config.save();
   delete ui;
+}
+
+void MainWindow::setLangList() {
+  m_tableList.clear();
+  for (int i : m_config.langList()) {
+    NumberTable table;
+    table.setLang_id(i);
+    m_tableList.append(table);
+  }
 }
 
 void MainWindow::initLang() {
@@ -136,6 +147,51 @@ void MainWindow::updateItem() {
       QString lang = m_langTable.getEn(lang_id);
       table.createItem(&m_db, num, exp, lang_id, lang);
     }
+  }
+}
+
+void MainWindow::openFile() {
+  QString selFilter = tr("JSON Documents(*.json)");
+  QString fileName = QFileDialog::getOpenFileName(
+      this, tr("Open language list"), ".",
+      tr("JSON Documents(*.json);;All(*.*)"), &selFilter,
+      QFileDialog::DontUseCustomDirectoryIcons);
+  if (!fileName.isEmpty()) {
+    QFile openFile(fileName);
+    openFile.open(QIODevice::ReadOnly);
+    QByteArray data = openFile.readAll();
+    QJsonDocument jsonDoc(QJsonDocument::fromJson(data));
+    QJsonObject jsonObj(jsonDoc.object());
+    QJsonArray jsonArr = jsonObj[JSONTAG].toArray();
+    QList<int> lst;
+    for (auto item : jsonArr) {
+      lst.append(item.toInt());
+    }
+    m_config.setLangList(lst);
+    setLangList();
+    showTable();
+  }
+}
+
+void MainWindow::saveFile() {
+  QJsonObject jsonObj;
+  QJsonArray jsonArr;
+  for (const NumberTable table : m_tableList) {
+    jsonArr.append(table.lang_id());
+  }
+  jsonObj[JSONTAG] = jsonArr;
+  QJsonDocument jsonDoc(jsonObj);
+  QByteArray data(jsonDoc.toJson());
+
+  QString selFilter;
+  QString fileName = QFileDialog::getSaveFileName(
+      this, tr("Save language list"), ".", tr("JSON documents(*.json)"),
+      &selFilter, QFileDialog::DontUseCustomDirectoryIcons);
+  if (!fileName.isEmpty()) {
+    QFile saveFile(fileName);
+    saveFile.open(QIODevice::WriteOnly);
+    saveFile.write(data);
+    saveFile.close();
   }
 }
 
