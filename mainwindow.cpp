@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow() {
   QList<int> langList;
-  for (NumberTable table : m_tableList) {
+  for (const NumberTable& table : m_tableList) {
     int lang_id = table.lang_id();
     langList.append(lang_id);
   }
@@ -176,7 +176,7 @@ void MainWindow::openFile() {
 void MainWindow::saveFile() {
   QJsonObject jsonObj;
   QJsonArray jsonArr;
-  for (const NumberTable table : m_tableList) {
+  for (const NumberTable& table : m_tableList) {
     jsonArr.append(table.lang_id());
   }
   jsonObj[JSONTAG] = jsonArr;
