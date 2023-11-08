@@ -252,6 +252,12 @@ void MainWindow::showTable() {
     pTableWidget->setColumnCount(header.count());
     pTableWidget->setHorizontalHeaderLabels(header);
     pTableWidget->verticalHeader()->setVisible(false);
+
+    for (int i = 0; i < header.length(); i++) {
+      QFont font = pTableWidget->horizontalHeaderItem(i)->font();
+      font.setBold(true);
+      pTableWidget->horizontalHeaderItem(i)->setFont(font);
+    }
   }
 
   // set table
@@ -273,6 +279,7 @@ void MainWindow::showTable() {
     pTableWidget->insertRow(row);
     QTableWidgetItem *targetItem =
         new QTableWidgetItem(QVariant(key).toString());
+    targetItem->setTextAlignment(Qt::AlignHCenter);
     pTableWidget->setItem(row, 0, targetItem);
     for (int i = 0; i < m_tableList.size(); i++) {
       NumberTable table = m_tableList[i];
