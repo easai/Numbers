@@ -95,6 +95,24 @@ void NumberTable::updateItem(QSqlDatabase *db, int num, const QString &exp,
   db->close();
 }
 
+void NumberTable::deleteItem(QSqlDatabase *db, int num, int lang_id) {
+  if (!db->open()) {
+    qInfo() << db->lastError().text();
+    return;
+  }
+  QSqlQuery query(*db);
+  QString sql = "DELETE FROM `numbers` WHERE lang_id=:lang_id "
+                "AND value=:num";
+  query.prepare(sql);
+  query.bindValue(":lang_id", lang_id);
+  query.bindValue(":num", num);
+  if (!query.exec()) {
+    qInfo() << db->lastError().text();
+    qInfo() << query.lastError().text();
+  }
+  db->close();
+}
+
 bool NumberTable::contains(int key) const { return m_table.contains(key); }
 
 int NumberTable::lang_id() const { return m_lang_id; }

@@ -42,6 +42,9 @@ MainWindow::MainWindow(QWidget *parent)
             &MainWindow::updateItem);
     connect(pTableWidget->horizontalHeader(), &QHeaderView::sectionClicked,
             this, &MainWindow::updateLang);
+    pTableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(pTableWidget, &QTableWidget::customContextMenuRequested, this,
+            &MainWindow::deleteNumber);
   }
   connect(ui->comboBox, &QComboBox::currentIndexChanged, this,
           &MainWindow::setSelectedLang);
@@ -49,7 +52,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow() {
   QList<int> langList;
-  for (const NumberTable& table : m_tableList) {
+  for (const NumberTable &table : m_tableList) {
     int lang_id = table.lang_id();
     langList.append(lang_id);
   }
@@ -150,6 +153,20 @@ void MainWindow::updateItem() {
   }
 }
 
+void MainWindow::deleteItem() {
+  int tabIndex = ui->tabWidget->currentIndex();
+  QTableWidget *pTableWidget = m_tableWidget[tabIndex];
+  int row = m_current->row();
+  int num = pTableWidget->item(row, 0)->text().toInt();
+  int col = m_current->column();
+  NumberTable table = m_tableList[col - 1];
+  int lang_id = table.lang_id();
+  if (table.contains(num)) {
+    table.deleteItem(&m_db, num, lang_id);
+    showTable();
+  }
+}
+
 void MainWindow::openFile() {
   QString selFilter = tr("JSON Documents(*.json)");
   QString fileName = QFileDialog::getOpenFileName(
@@ -176,7 +193,7 @@ void MainWindow::openFile() {
 void MainWindow::saveFile() {
   QJsonObject jsonObj;
   QJsonArray jsonArr;
-  for (const NumberTable& table : m_tableList) {
+  for (const NumberTable &table : m_tableList) {
     jsonArr.append(table.lang_id());
   }
   jsonObj[JSONTAG] = jsonArr;
@@ -192,6 +209,20 @@ void MainWindow::saveFile() {
     saveFile.open(QIODevice::WriteOnly);
     saveFile.write(data);
     saveFile.close();
+  }
+}
+
+void MainWindow::deleteNumber(const QPoint &pos) {
+  int tabIndex = ui->tabWidget->currentIndex();
+  QTableWidget *pTableWidget = m_tableWidget[tabIndex];
+  QTableWidgetItem *item = pTableWidget->itemAt(pos);
+  if (item != nullptr) {
+    QMenu *menu = new QMenu(this);
+    QAction *ciz = new QAction("&Delete Number");
+    connect(ciz, &QAction::triggered, this, &MainWindow::deleteItem);
+    menu->addAction(ciz);
+    menu->popup(pTableWidget->viewport()->mapToGlobal(pos));
+    m_current = item;
   }
 }
 

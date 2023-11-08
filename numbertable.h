@@ -20,6 +20,7 @@ public:
   void createItem(QSqlDatabase *db, int num, const QString &exp, int lang_id,
                   const QString &lang);
   void updateItem(QSqlDatabase *db, int num, const QString &exp, int lang_id);
+  void deleteItem(QSqlDatabase *db, int num, int lang_id);
   bool contains(int key) const;
 
   // Getters/Setters

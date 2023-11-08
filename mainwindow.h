@@ -29,8 +29,10 @@ private slots:
   void updateLang();
   void createItem();
   void updateItem();
+  void deleteItem();
   void openFile();
   void saveFile();
+  void deleteNumber(const QPoint &pos);
   void about();
 
 private:
@@ -39,6 +41,7 @@ private:
   QSqlDatabase m_db;
   LangTable m_langTable;
   Config m_config;
+  QTableWidgetItem* m_current;
 
   QList<QTableWidget *> m_tableWidget;
 
