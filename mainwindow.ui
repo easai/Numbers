@@ -139,6 +139,7 @@
     <property name="title">
      <string>&amp;Edit</string>
     </property>
+    <addaction name="actionSet_Font"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -169,6 +170,11 @@
   <action name="action_Save">
    <property name="text">
     <string>&amp;Save</string>
+   </property>
+  </action>
+  <action name="actionSet_Font">
+   <property name="text">
+    <string>Set &amp;Font</string>
    </property>
   </action>
  </widget>

@@ -25,6 +25,7 @@ public:
 
 private slots:
   void setLangList();
+  void setTableFont();
   void setSelectedLang();
   void updateLang();
   void createItem();
@@ -47,5 +48,6 @@ private:
 
   void initLang();
   void showTable();
+  void setConfigFont();
 };
 #endif // MAINWINDOW_H

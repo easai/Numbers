@@ -10,6 +10,7 @@
 #include <QJsonObject>
 #include <QtAlgorithms>
 #include <algorithm>
+#include <QFontDialog>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -24,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
           &MainWindow::createItem);
   connect(ui->action_Save, &QAction::triggered, this, &MainWindow::saveFile);
   connect(ui->action_Open, &QAction::triggered, this, &MainWindow::openFile);
+  connect(ui->actionSet_Font, &QAction::triggered, this, &MainWindow::setTableFont);
   connect(ui->action_About_Numbers, &QAction::triggered, this,
           &MainWindow::about);
   connect(ui->action_Quit, &QAction::triggered, this, &QApplication::quit);
@@ -45,6 +47,7 @@ MainWindow::MainWindow(QWidget *parent)
     pTableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(pTableWidget, &QTableWidget::customContextMenuRequested, this,
             &MainWindow::deleteNumber);
+    pTableWidget->setFont(m_config.font());
   }
   connect(ui->comboBox, &QComboBox::currentIndexChanged, this,
           &MainWindow::setSelectedLang);
@@ -58,6 +61,7 @@ MainWindow::~MainWindow() {
   }
   m_config.setLangList(langList);
   m_config.setGeom(saveGeometry());
+  m_config.setFont(m_tableWidget[0]->font());
   m_config.save();
   delete ui;
 }
@@ -288,6 +292,23 @@ void MainWindow::showTable() {
         pTableWidget->setItem(row, i + 1, new QTableWidgetItem(exp));
       }
     }
+  }
+}
+
+void MainWindow::setConfigFont()
+{
+  for (QTableWidget *pTableWidget : m_tableWidget) {
+    pTableWidget->setFont(m_config.font());
+  }
+}
+
+void MainWindow::setTableFont()
+{
+  bool ok;
+  QFont font = QFontDialog::getFont(&ok, m_config.font(), this);
+  if (ok) {
+    m_config.setFont(font);
+    setConfigFont();
   }
 }
 
