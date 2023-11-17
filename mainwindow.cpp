@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
   m_tableList.clear();
   setLangList();
   showTable();
+  setConfigFont();
   QString defaultLang = m_config.lang();
   ui->comboBox->setCurrentText(defaultLang);
   for (QTableWidget *pTableWidget : m_tableWidget) {
@@ -299,6 +300,9 @@ void MainWindow::setConfigFont()
 {
   for (QTableWidget *pTableWidget : m_tableWidget) {
     pTableWidget->setFont(m_config.font());
+    pTableWidget->resizeRowsToContents();
+    pTableWidget->horizontalHeader()->setStyleSheet("font-size:16px");
+    pTableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
   }
 }
 
